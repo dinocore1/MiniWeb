@@ -1,0 +1,10 @@
+apply plugin: 'java'
+
+dependencies {
+    compile 'org.apache.httpcomponents:httpcore:4.3.2'
+    compile 'org.slf4j:slf4j-api:1.7.+'
+    compile 'ch.qos.logback:logback-classic:1.+'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.apache.httpcomponents:httpclient:4.3.4'
+
+}
