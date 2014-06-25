@@ -1,17 +1,11 @@
 package org.devsmart.miniweb;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+import org.devsmart.miniweb.handlers.FileSystemRequestHandler;
+import org.devsmart.miniweb.impl.DefaultConnectionPolicy;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.File;
 
 public class ServerTest {
 
@@ -19,13 +13,18 @@ public class ServerTest {
     @Test
     public void test1() throws Exception {
 
-        Server server = new Server(9000);
+        UriHttpRequestHandlerMapper mapper = new UriHttpRequestHandlerMapper();
+        mapper.register("*", new FileSystemRequestHandler(new File("test"), null));
+
+        Server server = new Server(9000, mapper);
+        server.setConnectionPolicy(new DefaultConnectionPolicy(3));
         server.start();
 
 
         //let it start up
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
+        /*
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpget = new HttpGet("http://localhost:9000/");
 
@@ -48,6 +47,11 @@ public class ServerTest {
         String responseBody = httpclient.execute(httpget, responseHandler);
         System.out.println("----------------------------------------");
         System.out.println(responseBody);
+        */
+        boolean running = true;
+        while(running) {
+            Thread.sleep(1000);
+        }
 
         server.shutdown();
 

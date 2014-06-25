@@ -1,4 +1,9 @@
 apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
     compile 'org.apache.httpcomponents:httpcore:4.3.2'
