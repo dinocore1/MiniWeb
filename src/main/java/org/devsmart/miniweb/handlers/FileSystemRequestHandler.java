@@ -47,7 +47,7 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
                 }
 
                 if (file.exists() && file.isFile()) {
-                    logger.info("sent " + file.getPath());
+                    logger.debug("sent {}", file.getPath());
                     FileEntity body = new FileEntity(file);
                     response.setEntity(body);
                 } else {

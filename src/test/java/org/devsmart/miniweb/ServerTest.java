@@ -16,8 +16,11 @@ public class ServerTest {
         UriHttpRequestHandlerMapper mapper = new UriHttpRequestHandlerMapper();
         mapper.register("*", new FileSystemRequestHandler(new File("test"), null));
 
-        Server server = new Server(9000, mapper);
-        server.setConnectionPolicy(new DefaultConnectionPolicy(3));
+        Server server = new ServerBuilder()
+                .port(9000)
+                .requestHandlerMapper(mapper)
+                .create();
+
         server.start();
 
 

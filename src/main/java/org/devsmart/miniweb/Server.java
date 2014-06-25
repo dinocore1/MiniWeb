@@ -10,34 +10,21 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Server {
 
     public final Logger logger = LoggerFactory.getLogger(Server.class);
 
-    public final int port;
-    private final ExecutorService mWorkerThreads = new ThreadPoolExecutor(1, 10, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(20));
-    private final HttpRequestHandlerMapper requestHandlerMapper;
+    protected int port;
+    protected HttpRequestHandlerMapper requestHandlerMapper;
+    protected ConnectionPolicy connectionPolity;
+
+    private final ExecutorService mWorkerThreads = Executors.newCachedThreadPool();
+
     private Thread mListenThread;
     private boolean mRunning = false;
     private HttpCoreContext mContext;
-    private ConnectionPolicy mRemoteConnectionPolity;
-    private HashMap<InetAddress, ArrayList<HttpServerConnection>> mConnectionMap = new HashMap<InetAddress, ArrayList<HttpServerConnection>>();
-
-    public Server(int port, HttpRequestHandlerMapper requestHandlerMapper){
-        this.port = port;
-        this.requestHandlerMapper = requestHandlerMapper;
-    }
-
-    public void setConnectionPolicy(ConnectionPolicy policy){
-        mRemoteConnectionPolity = policy;
-    }
 
     public void start() throws IOException {
 
@@ -46,6 +33,7 @@ public class Server {
         }
 
         final ServerSocket mServerSocket = new ServerSocket(port);
+        logger.info("Server started listening on {}", mServerSocket.getLocalSocketAddress());
         mServerSocket.setSoTimeout(1000);
         mRunning = true;
 
@@ -65,14 +53,14 @@ public class Server {
                 while(mRunning){
                     try {
                         Socket socket = mServerSocket.accept();
-                        if(mRemoteConnectionPolity.accept(socket)){
-                            logger.debug("accepting connection from: " + socket.getInetAddress());
+                        if(connectionPolity.accept(socket)){
+                            logger.debug("accepting connection from: {}", socket.getRemoteSocketAddress());
                             DefaultBHttpServerConnection connection = DefaultBHttpServerConnectionFactory.INSTANCE.createConnection(socket);
                             RemoteConnection remoteConnection = new RemoteConnection(socket.getInetAddress(), connection);
-                            mRemoteConnectionPolity.connectionOpened(remoteConnection);
+                            connectionPolity.connectionOpened(remoteConnection);
                             mWorkerThreads.execute(new WorkerTask(httpService, remoteConnection));
                         } else {
-                            logger.debug("rejecting connection from: " + socket.getInetAddress());
+                            logger.debug("rejecting connection from: {}", socket);
 
                             try {
                                 DefaultBHttpServerConnection connection = DefaultBHttpServerConnectionFactory.INSTANCE.createConnection(socket);
@@ -109,6 +97,7 @@ public class Server {
             } catch (InterruptedException e) {
                 logger.error("", e);
             }
+            logger.info("Server shutdown");
         }
     }
 
@@ -131,10 +120,10 @@ public class Server {
                     httpservice.handleRequest(remoteConnection.connection, mContext);
                 }
             } catch (ConnectionClosedException e) {
-                logger.info("client closed connection");
+                logger.debug("client closed connection {}", remoteConnection.connection);
 
             } catch(SocketTimeoutException e){
-                logger.debug("timing out connection");
+                logger.debug("timing out connection {}", remoteConnection.connection);
                 try {
                     HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse
                             (HttpVersion.HTTP_1_0, HttpStatus.SC_GATEWAY_TIMEOUT,
@@ -166,7 +155,7 @@ public class Server {
 
             }
             finally {
-                mRemoteConnectionPolity.connectionClosed(remoteConnection);
+                connectionPolity.connectionClosed(remoteConnection);
             }
 
         }
