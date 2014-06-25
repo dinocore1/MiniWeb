@@ -1,5 +1,7 @@
 package org.devsmart.miniweb.handlers.controller;
 
+import org.devsmart.miniweb.utils.RequestMethod;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

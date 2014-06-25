@@ -1,10 +1,21 @@
 package org.devsmart.miniweb.handlers.controller;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.devsmart.miniweb.utils.UriQueryParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -14,7 +25,9 @@ import java.util.Set;
 
 public class ParamHandlerFactory {
 
-    public ParamHandler createParamHandler(final Class<?> paramType, Annotation[] annotation){
+    public final Logger logger = LoggerFactory.getLogger(ParamHandlerFactory.class);
+
+    public ParamHandler createParamHandler(final Class<?> paramType, Annotation[] annotations){
 
         if(HttpRequest.class.equals(paramType)){
             return new ParamHandler() {
@@ -37,38 +50,16 @@ public class ParamHandlerFactory {
                     return context;
                 }
             };
-        } else if(annotation != null){
-            if(annotation != null) {
-                final RequestParam paramKey = getRequestParam(annotation);
+        } else if(annotations != null){
+            if(annotations != null) {
+                final RequestParam paramKey = getAnnotationType(annotations, RequestParam.class);
                 if(paramKey != null) {
-                    return new ParamHandler() {
-                        @Override
-                        public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+                    return queryParam(paramType, paramKey);
+                }
 
-                            String uri = request.getRequestLine().getUri();
-                            Map<String, List<String>> params = UriQueryParser.getUrlParameters(uri);
-
-                            List<String> values = params.get(paramKey.value());
-                            if(values != null) {
-                                if (paramType.isArray()) {
-                                    String[] retval = new String[values.size()];
-                                    int i = 0;
-                                    for (String value : values) {
-                                        retval[i++] = value;
-                                    }
-                                    return retval;
-                                } else if (paramType.isAssignableFrom(List.class)) {
-                                    return values;
-                                } else if (paramType.isAssignableFrom(Set.class)) {
-                                    HashSet<String> retval = new HashSet<String>(values);
-                                    return retval;
-                                }
-                            }
-
-                            return null;
-
-                        }
-                    };
+                final Body body = getAnnotationType(annotations, Body.class);
+                if(body != null){
+                    return bodyParam(paramType, body);
                 }
             }
         }
@@ -76,14 +67,75 @@ public class ParamHandlerFactory {
         return null;
     }
 
-    private static RequestParam getRequestParam(Annotation[] annotations){
-        RequestParam retval = null;
+    private ParamHandler bodyParam(final Class<?> paramType, Body body) {
+        return new ParamHandler() {
+            @Override
+            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+                try {
+                    if(request instanceof HttpEntityEnclosingRequest){
+                        HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
+                        HttpEntity entityBody = entityRequest.getEntity();
+                        Header contentTypeHeader = entityBody.getContentType();
+                        ContentType contentType = null;
+                        if(contentTypeHeader != null
+                                && (contentType = ContentType.parse(contentTypeHeader.getValue())).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())){
+                            String resultBody = EntityUtils.toString(entityBody);
+                            Gson gson = new GsonBuilder().create();
+                            return gson.fromJson(resultBody, paramType);
+                        }
+                    }
+                    return null;
+                } catch(Exception e){
+                    logger.error("", e);
+                    return null;
+                }
+            }
+        };
+    }
+
+
+    private ParamHandler queryParam(final Class<?> paramType, final RequestParam paramKey) {
+        return new ParamHandler() {
+            @Override
+            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+
+                String uri = request.getRequestLine().getUri();
+                Map<String, List<String>> params = UriQueryParser.getUrlParameters(uri);
+
+                List<String> values = params.get(paramKey.value());
+                if(values != null) {
+                    if (paramType.isArray()) {
+                        String[] retval = new String[values.size()];
+                        int i = 0;
+                        for (String value : values) {
+                            retval[i++] = value;
+                        }
+                        return retval;
+                    } else if (paramType.isAssignableFrom(List.class)) {
+                        return values;
+                    } else if (paramType.isAssignableFrom(Set.class)) {
+                        HashSet<String> retval = new HashSet<String>(values);
+                        return retval;
+                    } else if (paramType.isAssignableFrom(String.class) && !values.isEmpty()){
+                        return values.get(0);
+                    }
+                }
+
+                return null;
+
+            }
+        };
+    }
+
+    private static <T extends Annotation> T getAnnotationType(Annotation[] annotations, Class<T> type){
+        T retval = null;
         for(Annotation a : annotations){
-            if(a instanceof RequestParam){
-                retval = (RequestParam) a;
+            if(type.isAssignableFrom(a.getClass())){
+                retval = (T)a;
                 break;
             }
         }
         return retval;
     }
+
 }

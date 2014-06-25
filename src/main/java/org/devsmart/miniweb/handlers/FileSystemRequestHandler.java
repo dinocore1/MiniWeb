@@ -3,11 +3,10 @@ package org.devsmart.miniweb.handlers;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.MethodNotSupportedException;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.devsmart.miniweb.Utils;
+import org.devsmart.miniweb.utils.RequestMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +31,7 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 
         try {
-            if (Utils.GET.equals(request.getRequestLine().getMethod())) {
+            if (RequestMethod.Get.name.equals(request.getRequestLine().getMethod())) {
 
                 URI url = new URI(request.getRequestLine().getUri());
                 String path = url.getPath();
