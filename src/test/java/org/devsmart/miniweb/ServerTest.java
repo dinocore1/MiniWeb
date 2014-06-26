@@ -1,24 +1,41 @@
 package org.devsmart.miniweb;
 
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
 import org.devsmart.miniweb.handlers.FileSystemRequestHandler;
+import org.devsmart.miniweb.handlers.controller.Controller;
+import org.devsmart.miniweb.handlers.controller.RequestMapping;
 import org.devsmart.miniweb.impl.DefaultConnectionPolicy;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 
 public class ServerTest {
 
 
-    @Test
-    public void test1() throws Exception {
+    @Controller
+    public static class MyController {
 
-        UriHttpRequestHandlerMapper mapper = new UriHttpRequestHandlerMapper();
-        mapper.register("*", new FileSystemRequestHandler(new File("test"), null));
+        @RequestMapping("hello")
+        public void handleHello(HttpRequest request, HttpResponse response) throws Exception {
+            StringEntity retval = new StringEntity("itworked");
+            response.setEntity(retval);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+
+
+
+        File fsRoot = new File("public");
 
         Server server = new ServerBuilder()
                 .port(9000)
-                .requestHandlerMapper(mapper)
+                .mapController("/cgi/*", new MyController())
+                .mapDirectory("/*", fsRoot)
                 .create();
 
         server.start();
