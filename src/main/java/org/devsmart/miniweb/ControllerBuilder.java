@@ -2,11 +2,7 @@ package org.devsmart.miniweb;
 
 
 import org.devsmart.miniweb.handlers.ReflectionControllerRequestHandler;
-import org.devsmart.miniweb.handlers.controller.Controller;
-import org.devsmart.miniweb.handlers.controller.ControllerInvoker;
-import org.devsmart.miniweb.handlers.controller.ParamHandler;
-import org.devsmart.miniweb.handlers.controller.ParamHandlerFactory;
-import org.devsmart.miniweb.handlers.controller.RequestMapping;
+import org.devsmart.miniweb.handlers.controller.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +53,7 @@ public class ControllerBuilder {
                     caller.pathEndpoint = prefix + "/" + pathsegment;
                     caller.instance = controller;
                     caller.method = method;
+                    caller.serializeRetval = method.getAnnotation(Body.class) == null ? false : true;
 
 
                     Class<?>[] paramTypes = method.getParameterTypes();

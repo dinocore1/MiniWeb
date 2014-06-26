@@ -1,6 +1,8 @@
 package org.devsmart.miniweb;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import org.apache.http.HttpHeaders;
@@ -22,6 +24,8 @@ import org.devsmart.miniweb.handlers.controller.RequestParam;
 import org.devsmart.miniweb.handlers.controller.RequestMapping;
 import org.devsmart.miniweb.utils.RequestMethod;
 import org.junit.Test;
+
+import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.*;
 
@@ -63,10 +67,18 @@ public class ReflectionControllerTest {
             StringEntity retval = new StringEntity("itworked");
             response.setEntity(retval);
         }
+
+        @RequestMapping(value = "getjson", method = RequestMethod.Get)
+        @Body
+        public TestObj handleGetJson() {
+            TestObj retval = new TestObj();
+            retval.name = "Jack";
+            return retval;
+        }
     }
 
     @Test
-    public void test() throws Exception {
+    public void testQueryParam() throws Exception {
 
         MyController controller = new MyController();
 
@@ -89,7 +101,7 @@ public class ReflectionControllerTest {
     }
 
     @Test
-    public void test2() throws Exception {
+    public void testJsonBody() throws Exception {
         MyController controller = new MyController();
 
         ReflectionControllerRequestHandler handler = new ControllerBuilder()
@@ -110,5 +122,31 @@ public class ReflectionControllerTest {
         assertTrue(response.getStatusLine().getStatusCode() == 200);
         String resultBody = EntityUtils.toString(response.getEntity());
         assertTrue("itworked".equals(resultBody));
+    }
+
+    @Test
+    public void testJsonResponse() throws Exception {
+        MyController controller = new MyController();
+
+        ReflectionControllerRequestHandler handler = new ControllerBuilder()
+                .addController(controller)
+                .withPathPrefix("/")
+                .create();
+
+
+        HttpCoreContext context = HttpCoreContext.create();
+        BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("GET", "/stuff/getjson");
+        HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, context);
+
+        handler.handle(request, response, context);
+
+        assertTrue(response.getStatusLine().getStatusCode() == 200);
+        String resultBody = EntityUtils.toString(response.getEntity());
+
+        Gson gson = new GsonBuilder().create();
+        MyController.TestObj retobj = gson.fromJson(resultBody, MyController.TestObj.class);
+
+        assertNotNull(retobj);
+        assertEquals("Jack", retobj.name);
     }
 }
