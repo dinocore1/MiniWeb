@@ -9,7 +9,7 @@ embedded web project up and running quickly (no servlets).
 
 Example Usage
 --------------
-Create a server that serves from the filesystem:
+Create a server that serves files from "public" folder:
 
 ```java
 
@@ -28,14 +28,16 @@ server.shutdown();
 
 ```
 
-Handle request programmatically is very simple with Controllers
+Handle request programmatically is very simple with Controllers. The following example will respond the a request for
+`/cgi/hello` with the text `world`. 
+
 ```java
 @Controller
 class MyController {
 
     @RequestMapping("hello")
     public void handleHello(HttpRequest request, HttpResponse response) throws Exception {
-        StringEntity retval = new StringEntity("itworked");
+        StringEntity retval = new StringEntity("world");
         response.setEntity(retval);
     }
 }
