@@ -118,6 +118,10 @@ public class ParamHandlerFactory {
                         return retval;
                     } else if (paramType.isAssignableFrom(String.class) && !values.isEmpty()){
                         return values.get(0);
+                    } else if(paramType.isAssignableFrom(double.class) && !values.isEmpty()) {
+                        return Double.parseDouble(values.get(0));
+                    } else if (paramType.isAssignableFrom(int.class) && !values.isEmpty()) {
+                        return Integer.parseInt(values.get(0));
                     }
                 }
 

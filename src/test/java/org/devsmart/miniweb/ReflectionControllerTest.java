@@ -55,6 +55,15 @@ public class ReflectionControllerTest {
             response.setEntity(retval);
         }
 
+        @RequestMapping(value = "testInt")
+        public void handleTestInt(HttpResponse response,
+                                  @RequestParam("apples") int numApples,
+                                  @RequestParam("bananas") double numBannans) throws Exception {
+
+            assertEquals(5, numApples);
+            assertEquals(4.3, numBannans, 0.000001);
+        }
+
         private static class TestObj {
             String name;
         }
@@ -78,7 +87,7 @@ public class ReflectionControllerTest {
     }
 
     @Test
-    public void testQueryParam() throws Exception {
+    public void testStringQueryParam() throws Exception {
 
         MyController controller = new MyController();
 
@@ -98,6 +107,25 @@ public class ReflectionControllerTest {
         String resultBody = EntityUtils.toString(response.getEntity());
         assertTrue("itworked".equals(resultBody));
 
+    }
+
+    @Test
+    public void testIntQueryParam() throws Exception {
+        MyController controller = new MyController();
+
+        ReflectionControllerRequestHandler handler = new ControllerBuilder()
+                .addController(controller)
+                .withPathPrefix("/")
+                .create();
+
+
+        HttpCoreContext context = HttpCoreContext.create();
+        HttpRequest request = DefaultHttpRequestFactory.INSTANCE.newHttpRequest("GET", "/stuff/testInt?apples=5&bananas=4.3");
+        HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, context);
+
+        handler.handle(request, response, context);
+
+        assertTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
     }
 
     @Test

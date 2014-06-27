@@ -3,6 +3,7 @@ package org.devsmart.miniweb.handlers;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.entity.FileEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -35,7 +36,7 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
 
                 URI url = new URI(request.getRequestLine().getUri());
                 String path = url.getPath();
-                if(mPrefix != null){
+                if(mPrefix != null && mPrefix.trim().length() > 0){
                     path = path.substring(0, mPrefix.length());
                 }
                 String[] pathsegments = path.split("/");
@@ -50,7 +51,7 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
                     FileEntity body = new FileEntity(file);
                     response.setEntity(body);
                 } else {
-                    response.setStatusCode(404);
+                    response.setStatusCode(HttpStatus.SC_NOT_FOUND);
                 }
 
             } else {
