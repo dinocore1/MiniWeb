@@ -3,11 +3,10 @@ package org.devsmart.miniweb.handlers.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -46,9 +45,10 @@ public class ControllerInvoker implements HttpRequestHandler {
         try {
             Object retval = method.invoke(instance, params);
             if(serializeRetval){
+                response.addHeader("Content-Type", "application/json");
                 Gson gson = getGson();
                 String respStr = gson.toJson(retval);
-                StringEntity respEntity = new StringEntity(respStr, ContentType.APPLICATION_JSON);
+                StringEntity respEntity = new StringEntity(respStr);
                 response.setEntity(respEntity);
             }
         } catch (Exception e) {

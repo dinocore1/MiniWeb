@@ -1,20 +1,21 @@
 package org.devsmart.miniweb;
 
 
-import org.apache.http.protocol.HttpRequestHandlerMapper;
-import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+//import org.apache.http.protocol.HttpRequestHandlerMapper;
+//import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+import org.apache.http.protocol.HttpRequestHandlerResolver;
 import org.devsmart.miniweb.handlers.FileSystemRequestHandler;
 import org.devsmart.miniweb.impl.DefaultConnectionPolicy;
 
 import java.io.File;
-import java.util.Objects;
 
 public class ServerBuilder {
 
     private int mPort = 8080;
     private ConnectionPolicy mConnectionPolicy = new DefaultConnectionPolicy(30);
-    private HttpRequestHandlerMapper mRequestMapper;
-    private UriHttpRequestHandlerMapper mUriMapper = new UriHttpRequestHandlerMapper();
+    private HttpRequestHandlerResolver mRequestHandler;
+    //private HttpRequestHandlerMapper mRequestMapper;
+    private UriRequestHandlerResolver mUriMapper = new UriRequestHandlerResolver();
 
     public ServerBuilder port(int port) {
         mPort = port;
@@ -59,19 +60,16 @@ public class ServerBuilder {
         return this;
     }
 
-    public ServerBuilder requestHandlerMapper(HttpRequestHandlerMapper mapper) {
-        mRequestMapper = mapper;
-        return this;
-    }
+
 
     public Server create() {
         Server server = new Server();
         server.port = mPort;
         server.connectionPolity = mConnectionPolicy;
-        if(mRequestMapper == null){
-            mRequestMapper = mUriMapper;
+        if(mRequestHandler == null){
+            mRequestHandler = mUriMapper;
         }
-        server.requestHandlerMapper = mRequestMapper;
+        server.requestHandlerResolver = mRequestHandler;
 
         return server;
     }

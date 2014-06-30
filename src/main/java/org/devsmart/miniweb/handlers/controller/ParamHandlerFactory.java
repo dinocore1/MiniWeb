@@ -7,10 +7,8 @@ import com.google.gson.GsonBuilder;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.devsmart.miniweb.utils.UriQueryParser;
@@ -76,9 +74,8 @@ public class ParamHandlerFactory {
                         HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
                         HttpEntity entityBody = entityRequest.getEntity();
                         Header contentTypeHeader = entityBody.getContentType();
-                        ContentType contentType = null;
-                        if(contentTypeHeader != null
-                                && (contentType = ContentType.parse(contentTypeHeader.getValue())).getMimeType().equals(ContentType.APPLICATION_JSON.getMimeType())){
+
+                        if(contentTypeHeader != null && contentTypeHeader.getValue().contains("json")){
                             String resultBody = EntityUtils.toString(entityBody);
                             Gson gson = new GsonBuilder().create();
                             return gson.fromJson(resultBody, paramType);
