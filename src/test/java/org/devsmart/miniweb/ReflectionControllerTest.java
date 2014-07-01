@@ -24,6 +24,7 @@ import org.apache.http.util.EntityUtils;
 import org.devsmart.miniweb.handlers.ReflectionControllerRequestHandler;
 import org.devsmart.miniweb.handlers.controller.Body;
 import org.devsmart.miniweb.handlers.controller.Controller;
+import org.devsmart.miniweb.handlers.controller.PathVariable;
 import org.devsmart.miniweb.handlers.controller.RequestParam;
 import org.devsmart.miniweb.handlers.controller.RequestMapping;
 import org.devsmart.miniweb.utils.RequestMethod;
@@ -87,6 +88,15 @@ public class ReflectionControllerTest {
             TestObj retval = new TestObj();
             retval.name = "Jack";
             return retval;
+        }
+
+        @RequestMapping(value = "request/{id}")
+        public void pathParam(@PathVariable("id") String myId, HttpResponse response) throws Exception {
+
+            assertNotNull(myId);
+
+            StringEntity retval = new StringEntity(myId);
+            response.setEntity(retval);
         }
     }
 
@@ -181,5 +191,29 @@ public class ReflectionControllerTest {
 
         assertNotNull(retobj);
         assertEquals("Jack", retobj.name);
+    }
+
+    @Test
+    public void testPathVar() throws Exception {
+        MyController controller = new MyController();
+
+        ReflectionControllerRequestHandler handler = new ControllerBuilder()
+                .addController(controller)
+                .withPathPrefix("/")
+                .create();
+
+
+        HttpCoreContext context = HttpCoreContext.create();
+        BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("GET", "/stuff/request/28");
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
+
+        handler.handle(request, response, context);
+
+        assertTrue(response.getStatusLine().getStatusCode() == 200);
+        String resultBody = EntityUtils.toString(response.getEntity());
+        assertEquals("28", resultBody);
+
+
+
     }
 }

@@ -22,13 +22,14 @@ public class ControllerInvoker implements HttpRequestHandler {
 
     public final Logger logger = LoggerFactory.getLogger(ControllerInvoker.class);
 
-    public String pathEndpoint;
+    public PathVarCapture pathEndpoint;
     public Object instance;
     public Method method;
     public ParamHandler[] paramHandlers;
     public boolean serializeRetval;
     private Gson mGson;
     public RequestMethod requestMethod;
+    public String pathPrefix;
 
     private Gson getGson() {
         if(mGson == null){

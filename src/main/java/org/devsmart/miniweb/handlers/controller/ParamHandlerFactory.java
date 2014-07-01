@@ -12,6 +12,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.devsmart.miniweb.handlers.ReflectionControllerRequestHandler;
 import org.devsmart.miniweb.utils.UriQueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +61,25 @@ public class ParamHandlerFactory {
                 if(body != null){
                     return bodyParam(paramType, body);
                 }
+
+                final PathVariable pathVar = getAnnotationType(annotations, PathVariable.class);
+                if(pathVar != null){
+                    return pathVar(paramType, pathVar);
+                }
             }
         }
 
         return null;
+    }
+
+    private ParamHandler pathVar(Class<?> paramType, final PathVariable pathVar) {
+        return new ParamHandler() {
+            @Override
+            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+                Map<String, String> pathParams = (Map<String, String>) request.getParams().getParameter(ReflectionControllerRequestHandler.PATH_VARS);
+                return pathParams.get(pathVar.value());
+            }
+        };
     }
 
     private ParamHandler bodyParam(final Class<?> paramType, Body body) {

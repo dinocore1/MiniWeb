@@ -47,11 +47,10 @@ public class ControllerBuilder {
             if(mapping != null){
 
                 for(String pathsegment : mapping.value()){
-                    pathsegment = trimPath(pathsegment);
-
                     ControllerInvoker caller = new ControllerInvoker();
                     caller.requestMethod = mapping.method();
-                    caller.pathEndpoint = prefix + "/" + pathsegment;
+                    caller.pathPrefix = prefix + "/";
+                    caller.pathEndpoint = new PathVarCapture(pathsegment);
                     caller.instance = controller;
                     caller.method = method;
                     caller.serializeRetval = method.getAnnotation(Body.class) == null ? false : true;
@@ -77,7 +76,7 @@ public class ControllerBuilder {
                     if(!allHandlersResolved){
                         logger.warn("Could not resolve handler {}:{}", controllerClass.getName(), method.getName());
                     } else {
-                        logger.info("Mapped {} {} --> {}:{}", caller.requestMethod, caller.pathEndpoint, controllerClass.getName(), method.getName());
+                        logger.info("Mapped {} {}{} --> {}:{}", caller.requestMethod, caller.pathPrefix, caller.pathEndpoint, controllerClass.getName(), method.getName());
                         mInvokers.add(caller);
 
                     }
