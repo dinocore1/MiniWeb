@@ -27,9 +27,6 @@ public class ServerTest {
     }
 
     public static void main(String[] args) throws Exception {
-
-
-
         File fsRoot = new File("public");
 
         Server server = new ServerBuilder()

@@ -9,6 +9,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.devsmart.miniweb.utils.UriQueryParser;
@@ -67,16 +68,32 @@ public class ParamHandlerFactory {
 
     private ParamHandler bodyParam(final Class<?> paramType, Body body) {
         return new ParamHandler() {
+
+            boolean isJsonType(HttpEntityEnclosingRequest request) {
+                HttpEntity entityBody = request.getEntity();
+
+                Header bodyContentTypeHeader = entityBody.getContentType();
+                if(bodyContentTypeHeader != null && bodyContentTypeHeader.getValue() != null &&
+                        bodyContentTypeHeader.getValue().contains("json")){
+                    return true;
+                }
+
+                Header contentTypeHeader = request.getFirstHeader(HTTP.CONTENT_TYPE);
+                if(contentTypeHeader != null && contentTypeHeader.getValue() != null &&
+                        contentTypeHeader.getValue().contains("json")){
+                    return true;
+                }
+
+                return false;
+            }
+
             @Override
             public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
                 try {
                     if(request instanceof HttpEntityEnclosingRequest){
                         HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
-                        HttpEntity entityBody = entityRequest.getEntity();
-                        Header contentTypeHeader = entityBody.getContentType();
-
-                        if(contentTypeHeader != null && contentTypeHeader.getValue().contains("json")){
-                            String resultBody = EntityUtils.toString(entityBody);
+                        if(isJsonType(entityRequest)) {
+                            String resultBody = EntityUtils.toString(entityRequest.getEntity());
                             Gson gson = new GsonBuilder().create();
                             return gson.fromJson(resultBody, paramType);
                         }

@@ -19,6 +19,9 @@ public class UriRequestHandlerResolver implements HttpRequestHandlerResolver {
         private final Pattern mPattern;
 
         public Endpoint(String pattern, HttpRequestHandler handler) {
+            pattern = pattern.trim();
+            pattern = pattern.replaceAll("\\*", "[^/]*");
+            pattern = pattern.startsWith("^") ? pattern : "^"+pattern;
             mPattern = Pattern.compile(pattern);
             mHandler = handler;
         }

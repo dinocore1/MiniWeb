@@ -50,6 +50,7 @@ public class ControllerBuilder {
                     pathsegment = trimPath(pathsegment);
 
                     ControllerInvoker caller = new ControllerInvoker();
+                    caller.requestMethod = mapping.method();
                     caller.pathEndpoint = prefix + "/" + pathsegment;
                     caller.instance = controller;
                     caller.method = method;
@@ -76,7 +77,7 @@ public class ControllerBuilder {
                     if(!allHandlersResolved){
                         logger.warn("Could not resolve handler {}:{}", controllerClass.getName(), method.getName());
                     } else {
-                        logger.info("Mapped {} --> {}:{}", caller.pathEndpoint, controllerClass.getName(), method.getName());
+                        logger.info("Mapped {} {} --> {}:{}", caller.requestMethod, caller.pathEndpoint, controllerClass.getName(), method.getName());
                         mInvokers.add(caller);
 
                     }

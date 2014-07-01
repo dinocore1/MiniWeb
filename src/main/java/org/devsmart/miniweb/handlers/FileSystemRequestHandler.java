@@ -32,7 +32,7 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 
         try {
-            if (RequestMethod.Get.name.equals(request.getRequestLine().getMethod())) {
+            if (RequestMethod.GET.name().equals(request.getRequestLine().getMethod())) {
 
                 URI url = new URI(request.getRequestLine().getUri());
                 String path = url.getPath();
@@ -56,7 +56,7 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
 
             } else {
                 //method not allowed
-                response.setStatusCode(405);
+                response.setStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
             }
         } catch (Exception e) {
             logger.error("", e);

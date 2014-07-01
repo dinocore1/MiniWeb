@@ -8,8 +8,10 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
+import org.devsmart.miniweb.utils.RequestMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,7 @@ public class ControllerInvoker implements HttpRequestHandler {
     public ParamHandler[] paramHandlers;
     public boolean serializeRetval;
     private Gson mGson;
+    public RequestMethod requestMethod;
 
     private Gson getGson() {
         if(mGson == null){
@@ -36,7 +39,6 @@ public class ControllerInvoker implements HttpRequestHandler {
 
     @Override
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
-
         Object[] params = new Object[paramHandlers.length];
         for(int i=0;i<params.length;i++){
             params[i] = paramHandlers[i].createParam(request, response, context);
@@ -45,10 +47,10 @@ public class ControllerInvoker implements HttpRequestHandler {
         try {
             Object retval = method.invoke(instance, params);
             if(serializeRetval){
-                response.addHeader("Content-Type", "application/json");
                 Gson gson = getGson();
                 String respStr = gson.toJson(retval);
-                StringEntity respEntity = new StringEntity(respStr);
+                StringEntity respEntity = new StringEntity(respStr, HTTP.UTF_8);
+                respEntity.setContentType("application/json");
                 response.setEntity(respEntity);
             }
         } catch (Exception e) {

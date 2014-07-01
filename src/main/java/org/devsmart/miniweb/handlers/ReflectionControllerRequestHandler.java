@@ -4,6 +4,7 @@ package org.devsmart.miniweb.handlers;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.devsmart.miniweb.handlers.controller.ControllerInvoker;
@@ -28,13 +29,14 @@ public class ReflectionControllerRequestHandler implements HttpRequestHandler {
     @Override
     public void handle(HttpRequest request, HttpResponse response, HttpContext context) throws HttpException, IOException {
 
+        final String requestMethod = request.getRequestLine().getMethod();
         final String uri = request.getRequestLine().getUri();
         final String path = UriQueryParser.getUrlPath(uri);
 
         boolean handled = false;
         for(ControllerInvoker invoker : mInvokers){
             String invokerPath = mPrefix + invoker.pathEndpoint;
-            if(path.equals(invokerPath)){
+            if(requestMethod.equals(invoker.requestMethod.name()) && path.equals(invokerPath)){
                 invoker.handle(request, response, context);
                 handled = true;
                 break;
@@ -42,7 +44,7 @@ public class ReflectionControllerRequestHandler implements HttpRequestHandler {
         }
 
         if(!handled){
-            response.setStatusCode(404);
+            response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
         }
 
     }

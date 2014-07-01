@@ -10,11 +10,15 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
+import org.apache.http.StatusLine;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.DefaultHttpRequestFactory;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.message.BasicStatusLine;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 import org.devsmart.miniweb.handlers.ReflectionControllerRequestHandler;
@@ -39,7 +43,7 @@ public class ReflectionControllerTest {
 
         }
 
-        @RequestMapping(value = "test", method = RequestMethod.Get)
+        @RequestMapping(value = "test", method = RequestMethod.GET)
         public void handleGet(HttpRequest request, HttpResponse response,
                               @RequestParam("param1") String[] param1,
                               @RequestParam("param2") String param2) throws Exception {
@@ -68,7 +72,7 @@ public class ReflectionControllerTest {
             String name;
         }
 
-        @RequestMapping(value = "putthis", method = RequestMethod.Put)
+        @RequestMapping(value = "putthis", method = RequestMethod.PUT)
         public void handlePutthis(@Body TestObj obj, HttpResponse response) throws Exception {
 
             assertNotNull(obj);
@@ -77,7 +81,7 @@ public class ReflectionControllerTest {
             response.setEntity(retval);
         }
 
-        @RequestMapping(value = "getjson", method = RequestMethod.Get)
+        @RequestMapping(value = "getjson", method = RequestMethod.GET)
         @Body
         public TestObj handleGetJson() {
             TestObj retval = new TestObj();
@@ -98,8 +102,8 @@ public class ReflectionControllerTest {
 
 
         HttpCoreContext context = HttpCoreContext.create();
-        HttpRequest request = DefaultHttpRequestFactory.INSTANCE.newHttpRequest("GET", "/stuff/test?param1=itworked&param2=rad&param1=cool");
-        HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, context);
+        HttpRequest request = new BasicHttpRequest("GET", "/stuff/test?param1=itworked&param2=rad&param1=cool");
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
 
         handler.handle(request, response, context);
 
@@ -120,8 +124,8 @@ public class ReflectionControllerTest {
 
 
         HttpCoreContext context = HttpCoreContext.create();
-        HttpRequest request = DefaultHttpRequestFactory.INSTANCE.newHttpRequest("GET", "/stuff/testInt?apples=5&bananas=4.3");
-        HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, context);
+        HttpRequest request = new BasicHttpRequest("GET", "/stuff/testInt?apples=5&bananas=4.3");
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
 
         handler.handle(request, response, context);
 
@@ -140,10 +144,11 @@ public class ReflectionControllerTest {
 
         HttpCoreContext context = HttpCoreContext.create();
         BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("PUT", "/stuff/putthis");
-        request.setEntity(new StringEntity("{ \"name\": \"paul\" }", ContentType.APPLICATION_JSON));
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity("{ \"name\": \"paul\" }"));
 
 
-        HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, context);
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
 
         handler.handle(request, response, context);
 
@@ -164,7 +169,7 @@ public class ReflectionControllerTest {
 
         HttpCoreContext context = HttpCoreContext.create();
         BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("GET", "/stuff/getjson");
-        HttpResponse response = DefaultHttpResponseFactory.INSTANCE.newHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, context);
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
 
         handler.handle(request, response, context);
 
