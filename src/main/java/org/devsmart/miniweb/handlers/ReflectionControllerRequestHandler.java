@@ -11,7 +11,6 @@ import org.devsmart.miniweb.handlers.controller.ControllerInvoker;
 import org.devsmart.miniweb.utils.UriQueryParser;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

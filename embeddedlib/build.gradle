@@ -13,6 +13,17 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    main {
+        java {
+            srcDir '../src/main/java'
+        }
+        resources {
+            srcDir '../src/main/resources'
+        }
+    }
+}
+
 dependencies {
     compile 'org.apache.httpcomponents:httpcore:4.0-beta2'
     compile 'com.google.code.gson:gson:2.2.4'
