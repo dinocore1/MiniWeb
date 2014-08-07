@@ -36,6 +36,10 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
 
                 URI url = new URI(request.getRequestLine().getUri());
                 String path = url.getPath();
+                if("/".equals(path)){
+                    handleRoot(request, response, context);
+                    return;
+                }
                 if(mPrefix != null && mPrefix.trim().length() > 0){
                     path = path.substring(0, mPrefix.length());
                 }
@@ -62,8 +66,24 @@ public class FileSystemRequestHandler implements HttpRequestHandler {
             logger.error("", e);
             response.setStatusCode(500);
         }
+    }
 
+    final String[] sIndexFiles = new String[]{
+            "index.html",
+            "index.htm"
+    };
 
+    private void handleRoot(HttpRequest request, HttpResponse response, HttpContext context) {
+        for(String filename : sIndexFiles){
+            File file = new File(mRoot, filename);
+            if(file.exists() && file.isFile()){
+                logger.debug("sent {}", file.getPath());
+                FileEntity body = new FileEntity(file, "");
+                response.setEntity(body);
+                return;
+            }
+        }
 
+        response.setStatusCode(HttpStatus.SC_NOT_FOUND);
     }
 }
