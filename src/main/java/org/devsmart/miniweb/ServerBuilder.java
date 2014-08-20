@@ -3,7 +3,9 @@ package org.devsmart.miniweb;
 
 //import org.apache.http.protocol.HttpRequestHandlerMapper;
 //import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
+import org.devsmart.miniweb.handlers.AssetsFileHandler;
 import org.devsmart.miniweb.handlers.FileSystemRequestHandler;
 import org.devsmart.miniweb.impl.DefaultConnectionPolicy;
 
@@ -60,7 +62,10 @@ public class ServerBuilder {
         return this;
     }
 
-
+    public ServerBuilder mapHandler(String pattern, HttpRequestHandler handler) {
+        mUriMapper.register(pattern, handler);
+        return this;
+    }
 
     public Server create() {
         Server server = new Server();
@@ -73,5 +78,4 @@ public class ServerBuilder {
 
         return server;
     }
-
 }
