@@ -1,11 +1,9 @@
 package org.devsmart.miniweb;
 
 
-//import org.apache.http.protocol.HttpRequestHandlerMapper;
-//import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
-import org.devsmart.miniweb.handlers.AssetsFileHandler;
 import org.devsmart.miniweb.handlers.FileSystemRequestHandler;
 import org.devsmart.miniweb.impl.DefaultConnectionPolicy;
 
@@ -16,7 +14,6 @@ public class ServerBuilder {
     private int mPort = 8080;
     private ConnectionPolicy mConnectionPolicy = new DefaultConnectionPolicy(30);
     private HttpRequestHandlerResolver mRequestHandler;
-    //private HttpRequestHandlerMapper mRequestMapper;
     private UriRequestHandlerResolver mUriMapper = new UriRequestHandlerResolver();
 
     public ServerBuilder port(int port) {
