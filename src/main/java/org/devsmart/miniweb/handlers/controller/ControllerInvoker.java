@@ -46,7 +46,15 @@ public class ControllerInvoker implements HttpRequestHandler {
         }
 
         try {
-            Object retval = method.invoke(instance, params);
+            Object retval;
+            if(params.length > 0 && params[0] instanceof Object[])
+            {
+                retval = method.invoke(instance, (Object)params[0]);
+            }
+            else
+            {
+                retval = method.invoke(instance, params);
+            }
             if(serializeRetval){
                 Gson gson = getGson();
                 String respStr = gson.toJson(retval);
