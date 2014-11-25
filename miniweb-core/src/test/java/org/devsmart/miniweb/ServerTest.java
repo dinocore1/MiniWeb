@@ -4,14 +4,11 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
-import org.devsmart.miniweb.handlers.FileSystemRequestHandler;
 import org.devsmart.miniweb.handlers.controller.Controller;
 import org.devsmart.miniweb.handlers.controller.RequestMapping;
-import org.devsmart.miniweb.impl.DefaultConnectionPolicy;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 
 public class ServerTest {
 

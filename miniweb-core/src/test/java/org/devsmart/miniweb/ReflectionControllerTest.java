@@ -30,8 +30,6 @@ import org.devsmart.miniweb.handlers.controller.RequestMapping;
 import org.devsmart.miniweb.utils.RequestMethod;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutorService;
-
 import static org.junit.Assert.*;
 
 public class ReflectionControllerTest {
@@ -215,5 +213,50 @@ public class ReflectionControllerTest {
 
 
 
+    }
+
+
+    public interface SomeController {
+
+        @RequestMapping(value = "putthis", method = RequestMethod.PUT)
+        public void handlePutthis(@Body MyController.TestObj obj, HttpResponse response) throws Exception;
+    }
+
+    @Controller("stuff/")
+    public static class MyInheritController implements SomeController {
+
+        @Override
+        public void handlePutthis(@Body MyController.TestObj obj, HttpResponse response) throws Exception {
+            assertNotNull(obj);
+
+            StringEntity retval = new StringEntity("itworked");
+            response.setEntity(retval);
+        }
+    }
+
+    @Test
+    public void testInheritController() throws Exception {
+
+        MyInheritController controller = new MyInheritController();
+
+        ReflectionControllerRequestHandler handler = new ControllerBuilder()
+                .addController(controller)
+                .withPathPrefix("/")
+                .create();
+
+
+        HttpCoreContext context = HttpCoreContext.create();
+        BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("PUT", "/stuff/putthis");
+        request.setHeader("Content-Type", "application/json");
+        request.setEntity(new StringEntity("{ \"name\": \"paul\" }"));
+
+
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
+
+        handler.handle(request, response, context);
+
+        assertTrue(response.getStatusLine().getStatusCode() == 200);
+        String resultBody = EntityUtils.toString(response.getEntity());
+        assertTrue("itworked".equals(resultBody));
     }
 }

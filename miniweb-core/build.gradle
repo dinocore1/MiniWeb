@@ -1,0 +1,41 @@
+
+
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility = JavaVersion.VERSION_1_6
+targetCompatibility = JavaVersion.VERSION_1_6
+
+
+dependencies {
+    compile 'org.apache.httpcomponents:httpcore:4.0-beta2'
+    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'org.slf4j:slf4j-api:1.7.+'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.slf4j:slf4j-simple:1.7.+'
+    testCompile 'org.apache.httpcomponents:httpclient:4.3.4'
+
+}
+
+task sourceJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourceJar
+}
+
+
+uploadArchives {
+    repositories.mavenDeployer {
+        //repository(url: "file:///home/paul/mymaven")
+        repository(url: "file://localhost/var/www/maven/")
+        //pom.groupId = project.group
+        //pom.artifactId = 'miniweb'
+        //pom.version = project.version
+
+    }
+}

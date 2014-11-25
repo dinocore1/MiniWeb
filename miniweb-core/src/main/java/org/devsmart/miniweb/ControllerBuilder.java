@@ -43,7 +43,7 @@ public class ControllerBuilder {
 
 
         for(Method method : controllerClass.getMethods()){
-            RequestMapping mapping = method.getAnnotation(RequestMapping.class);
+            RequestMapping mapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
             if(mapping != null){
 
                 for(String pathsegment : mapping.value()){
@@ -53,7 +53,7 @@ public class ControllerBuilder {
                     caller.pathEndpoint = new PathVarCapture(pathsegment);
                     caller.instance = controller;
                     caller.method = method;
-                    caller.serializeRetval = method.getAnnotation(Body.class) == null ? false : true;
+                    caller.serializeRetval = AnnotationUtils.findAnnotation(method, Body.class) != null;
 
 
                     Class<?>[] paramTypes = method.getParameterTypes();

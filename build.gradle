@@ -1,24 +1,16 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
+allprojects {
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
+    group = 'com.sciaps.lib'
+    version = '0.1.0'
+    description = 'A embedded java webserver'
 
-archivesBaseName = 'miniweb'
-group = 'org.devsmart'
-version = '0.0.1'
-description = 'A embedded java webserver'
-
-repositories {
-    mavenCentral()
-}
-
-
-dependencies {
-    compile 'org.apache.httpcomponents:httpcore:4.0-beta2'
-    compile 'com.google.code.gson:gson:2.2.4'
-    compile 'org.slf4j:slf4j-api:1.7.+'
-    testCompile 'junit:junit:4.11'
-    testCompile 'org.apache.httpcomponents:httpclient:4.3.4'
-
+    repositories {
+        mavenCentral()
+        maven {
+            url "http://maven.sciaps.local"
+        }
+        maven {
+            url "http://files.couchbase.com/maven2/"
+        }
+    }
 }
