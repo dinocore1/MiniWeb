@@ -4,7 +4,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
@@ -13,7 +13,7 @@ apply plugin: 'maven'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "20.0.0"
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 14
@@ -48,7 +48,6 @@ task androidSourcesJar(type: Jar) {
 
 artifacts() {
     archives androidSourcesJar
-    //archives file('build/outputs/aar/androidlib.aar')
 }
 
 uploadArchives {
