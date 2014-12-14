@@ -1,6 +1,6 @@
 allprojects {
 
-    group = 'com.sciaps.lib'
+    group = 'com.dev-smart'
     version = '0.1.0'
     description = 'A embedded java webserver'
 
