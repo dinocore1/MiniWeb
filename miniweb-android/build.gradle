@@ -38,7 +38,7 @@ android {
 dependencies {
     compile project(':miniweb-core')
     compile 'com.google.code.gson:gson:2.2.4'
-    compile 'org.slf4j:slf4j-api:1.7.+'
+    compile 'org.slf4j:slf4j-api:1.7.8'
 
 }
 
@@ -51,6 +51,10 @@ artifacts() {
     archives androidSourcesJar
 }
 
+signing {
+    sign configurations.archives
+}
+
 uploadArchives {
     repositories.mavenDeployer {
 
@@ -61,6 +65,8 @@ uploadArchives {
         }
 
         pom.project {
+            name 'Miniweb-core'
+            description 'Miniweb is an embedded webserver for Android.'
             url 'http://github.com/dinocore1/MiniWeb'
 
             scm {

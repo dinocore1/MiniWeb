@@ -13,11 +13,16 @@ targetCompatibility = JavaVersion.VERSION_1_6
 dependencies {
     compile 'org.apache.httpcomponents:httpcore:4.0-beta2'
     compile 'com.google.code.gson:gson:2.2.4'
-    compile 'org.slf4j:slf4j-api:1.7.+'
+    compile 'org.slf4j:slf4j-api:1.7.8'
     testCompile 'junit:junit:4.11'
-    testCompile 'org.slf4j:slf4j-simple:1.7.+'
+    testCompile 'org.slf4j:slf4j-simple:1.7.8'
     testCompile 'org.apache.httpcomponents:httpclient:4.3.4'
 
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
 }
 
 task sourceJar(type: Jar) {
@@ -26,9 +31,13 @@ task sourceJar(type: Jar) {
 }
 
 artifacts {
+    archives javadocJar
     archives sourceJar
 }
 
+signing {
+    sign configurations.archives
+}
 
 uploadArchives {
     repositories.mavenDeployer {
@@ -40,6 +49,8 @@ uploadArchives {
         }
 
         pom.project {
+            name 'Miniweb-core'
+            description 'Miniweb is an embedded webserver for Java.'
             url 'http://github.com/dinocore1/MiniWeb'
 
             scm {
