@@ -39,6 +39,31 @@ uploadArchives {
             authentication(userName: sonatypeUsername, password: sonatypePassword)
         }
 
+        pom.project {
+            url 'http://github.com/dinocore1/MiniWeb'
+
+            scm {
+                url 'scm:git@github.com:dinocore1/MiniWeb.git'
+                connection 'scm:git@github.com:dinocore1/MiniWeb.git'
+                developerConnection 'scm:git@github.com:dinocore1/MiniWeb.git'
+            }
+
+            licenses {
+                license {
+                    name 'MIT License'
+                    url 'https://github.com/dinocore1/MiniWeb/blob/master/LICENSE.txt'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'psoucy'
+                    name 'Paul Soucy'
+                }
+            }
+        }
+
         //repository(url: "file:///home/paul/mymaven")
         //repository(url: "file://localhost/var/www/maven/")
         //pom.groupId = project.group
