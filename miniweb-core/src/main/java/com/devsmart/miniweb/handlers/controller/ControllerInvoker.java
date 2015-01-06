@@ -31,10 +31,11 @@ public class ControllerInvoker implements HttpRequestHandler {
     public RequestMethod requestMethod;
     public String pathPrefix;
 
+    public ControllerInvoker(Gson gson) {
+        mGson = gson;
+    }
+
     private Gson getGson() {
-        if(mGson == null){
-            mGson = new GsonBuilder().create();
-        }
         return mGson;
     }
 

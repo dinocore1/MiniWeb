@@ -2,6 +2,9 @@ package com.devsmart.miniweb;
 
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
 import com.devsmart.miniweb.handlers.FileSystemRequestHandler;
@@ -15,6 +18,7 @@ public class ServerBuilder {
     private ConnectionPolicy mConnectionPolicy = new DefaultConnectionPolicy(30);
     private HttpRequestHandlerResolver mRequestHandler;
     private UriRequestHandlerResolver mUriMapper = new UriRequestHandlerResolver();
+    private Gson mGson;
 
     public ServerBuilder port(int port) {
         mPort = port;
@@ -39,11 +43,23 @@ public class ServerBuilder {
 
     }
 
+    public ServerBuilder setGson(Gson gson) {
+        mGson = gson;
+        return this;
+    }
+
+    public Gson getGson() {
+        if(mGson == null) {
+            mGson = new GsonBuilder().create();
+        }
+        return mGson;
+    }
+
     public ServerBuilder mapController(String pattern, Object... controllers) {
         ControllerBuilder builder = new ControllerBuilder();
         builder.withPathPrefix(trimPattern(pattern));
         for(Object controller : controllers){
-            builder.addController(controller);
+            builder.addController(controller, getGson());
         }
         mUriMapper.register(pattern, builder.create());
         return this;

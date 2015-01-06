@@ -1,6 +1,9 @@
 package com.devsmart.miniweb;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import com.devsmart.miniweb.handlers.ReflectionControllerRequestHandler;
 import com.devsmart.miniweb.handlers.controller.*;
 import org.slf4j.Logger;
@@ -18,6 +21,7 @@ public class ControllerBuilder {
 
     private LinkedList<ControllerInvoker> mInvokers = new LinkedList<ControllerInvoker>();
     private String mPrefix;
+    private Gson mGson;
 
 
     private static String trimPath(String path) {
@@ -30,7 +34,22 @@ public class ControllerBuilder {
         return path;
     }
 
+    public void setGson(Gson gson) {
+        mGson = gson;
+    }
+
+    public Gson getGson() {
+        if(mGson == null) {
+            mGson = new GsonBuilder().create();
+        }
+        return mGson;
+    }
+
     public ControllerBuilder addController(Object controller) {
+        return addController(controller, getGson());
+    }
+
+    public ControllerBuilder addController(Object controller, Gson gson) {
         final Class<? extends Object> controllerClass = controller.getClass();
 
         String prefix = "";
@@ -47,7 +66,7 @@ public class ControllerBuilder {
             if(mapping != null){
 
                 for(String pathsegment : mapping.value()){
-                    ControllerInvoker caller = new ControllerInvoker();
+                    ControllerInvoker caller = new ControllerInvoker(gson);
                     caller.requestMethod = mapping.method();
                     caller.pathPrefix = prefix + "/";
                     caller.pathEndpoint = new PathVarCapture(pathsegment);
