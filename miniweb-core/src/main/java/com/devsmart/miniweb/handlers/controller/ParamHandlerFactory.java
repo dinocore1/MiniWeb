@@ -2,7 +2,6 @@ package com.devsmart.miniweb.handlers.controller;
 
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -26,8 +25,11 @@ import java.util.Set;
 public class ParamHandlerFactory {
 
     public final Logger logger = LoggerFactory.getLogger(ParamHandlerFactory.class);
+    private Gson mGson;
 
-    public ParamHandler createParamHandler(final Class<?> paramType, Annotation[] annotations){
+    public ParamHandler createParamHandler(final Class<?> paramType, Annotation[] annotations, Gson gson){
+
+        mGson = gson;
 
         if(HttpRequest.class.equals(paramType)){
             return new ParamHandler() {
@@ -110,8 +112,7 @@ public class ParamHandlerFactory {
                         HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
                         if(isJsonType(entityRequest)) {
                             String resultBody = EntityUtils.toString(entityRequest.getEntity());
-                            Gson gson = new GsonBuilder().create();
-                            return gson.fromJson(resultBody, paramType);
+                            return mGson.fromJson(resultBody, paramType);
                         }
                     }
                     return null;

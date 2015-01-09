@@ -2,7 +2,6 @@ package com.devsmart.miniweb.handlers.controller;
 
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;

@@ -18,7 +18,7 @@ public class ServerBuilder {
     private ConnectionPolicy mConnectionPolicy = new DefaultConnectionPolicy(30);
     private HttpRequestHandlerResolver mRequestHandler;
     private UriRequestHandlerResolver mUriMapper = new UriRequestHandlerResolver();
-    private Gson mGson;
+    private Gson mGson = new GsonBuilder().create();
 
     public ServerBuilder port(int port) {
         mPort = port;
@@ -48,18 +48,11 @@ public class ServerBuilder {
         return this;
     }
 
-    public Gson getGson() {
-        if(mGson == null) {
-            mGson = new GsonBuilder().create();
-        }
-        return mGson;
-    }
-
     public ServerBuilder mapController(String pattern, Object... controllers) {
-        ControllerBuilder builder = new ControllerBuilder();
+        ControllerBuilder builder = new ControllerBuilder(mGson);
         builder.withPathPrefix(trimPattern(pattern));
         for(Object controller : controllers){
-            builder.addController(controller, getGson());
+            builder.addController(controller);
         }
         mUriMapper.register(pattern, builder.create());
         return this;

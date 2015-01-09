@@ -23,6 +23,9 @@ public class ControllerBuilder {
     private String mPrefix;
     private Gson mGson;
 
+    public ControllerBuilder(Gson gson) {
+        mGson = gson;
+    }
 
     private static String trimPath(String path) {
         path = path.trim();
@@ -34,22 +37,7 @@ public class ControllerBuilder {
         return path;
     }
 
-    public void setGson(Gson gson) {
-        mGson = gson;
-    }
-
-    public Gson getGson() {
-        if(mGson == null) {
-            mGson = new GsonBuilder().create();
-        }
-        return mGson;
-    }
-
     public ControllerBuilder addController(Object controller) {
-        return addController(controller, getGson());
-    }
-
-    public ControllerBuilder addController(Object controller, Gson gson) {
         final Class<? extends Object> controllerClass = controller.getClass();
 
         String prefix = "";
@@ -66,7 +54,7 @@ public class ControllerBuilder {
             if(mapping != null){
 
                 for(String pathsegment : mapping.value()){
-                    ControllerInvoker caller = new ControllerInvoker(gson);
+                    ControllerInvoker caller = new ControllerInvoker(mGson);
                     caller.requestMethod = mapping.method();
                     caller.pathPrefix = prefix + "/";
                     caller.pathEndpoint = new PathVarCapture(pathsegment);
@@ -83,7 +71,7 @@ public class ControllerBuilder {
                     for(int i=0;i<caller.paramHandlers.length;i++){
                         Class<?> paramClass = paramTypes[i];
                         Annotation[] annotations = method.getParameterAnnotations()[i];
-                        caller.paramHandlers[i] = mParamFactory.createParamHandler(paramClass, annotations);
+                        caller.paramHandlers[i] = mParamFactory.createParamHandler(paramClass, annotations, mGson);
 
                         if(caller.paramHandlers[i] == null){
                             allHandlersResolved = false;
