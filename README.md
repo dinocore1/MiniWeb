@@ -105,3 +105,22 @@ public MyModel handleHello() {
   }
 }
 ```
+
+Also, you can use a JsonWriter to write streaming json responses. Like so:
+
+```java
+@Controller
+class MyController {
+
+@RequestMapping("hello")
+@Body
+public void handleHello(JsonWriter writer) {
+    //use the writer as normal. Just remember to close the writer when done!
+    writer.beginObject();
+    writer.name("hello");
+    writer.value("world");
+    writer.endObject();
+    writer.close();
+  }
+}
+```

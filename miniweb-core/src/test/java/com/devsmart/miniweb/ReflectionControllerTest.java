@@ -22,7 +22,13 @@ import com.devsmart.miniweb.handlers.controller.PathVariable;
 import com.devsmart.miniweb.handlers.controller.RequestParam;
 import com.devsmart.miniweb.handlers.controller.RequestMapping;
 import com.devsmart.miniweb.utils.RequestMethod;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
+
 import org.junit.Test;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -80,6 +86,15 @@ public class ReflectionControllerTest {
             TestObj retval = new TestObj();
             retval.name = "Jack";
             return retval;
+        }
+
+        @RequestMapping(value = "getjsonstream", method = RequestMethod.GET)
+        public void handleGetJsonStream(JsonWriter writer) throws IOException {
+            writer.beginObject();
+            writer.name("hello");
+            writer.value("world");
+            writer.endObject();
+            writer.close();
         }
 
         @RequestMapping(value = "request/{id}")
@@ -183,6 +198,40 @@ public class ReflectionControllerTest {
 
         assertNotNull(retobj);
         assertEquals("Jack", retobj.name);
+    }
+
+    @Test
+    public void testJsonWriterResponse() throws Exception {
+
+
+        MyController controller = new MyController();
+
+        ReflectionControllerRequestHandler handler = new ControllerBuilder(new GsonBuilder().create())
+                .addController(controller)
+                .withPathPrefix("/")
+                .create();
+
+
+        HttpCoreContext context = HttpCoreContext.create();
+        BasicHttpEntityEnclosingRequest request = new BasicHttpEntityEnclosingRequest("GET", "/stuff/getjsonstream");
+        HttpResponse response = new BasicHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, ""));
+
+        handler.handle(request, response, context);
+
+        assertTrue(response.getStatusLine().getStatusCode() == 200);
+        String resultBody = EntityUtils.toString(response.getEntity());
+
+        Gson gson = new GsonBuilder().create();
+        JsonElement retobj = gson.fromJson(resultBody, JsonElement.class);
+        assertNotNull(retobj);
+        assertTrue(retobj.isJsonObject());
+        JsonObject obj = retobj.getAsJsonObject();
+        JsonElement value = obj.get("hello");
+        assertNotNull(value);
+        assertTrue(value.isJsonPrimitive() && value.getAsJsonPrimitive().isString());
+        String world = value.getAsString();
+        assertEquals("world", world);
+
     }
 
     @Test

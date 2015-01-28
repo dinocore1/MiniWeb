@@ -7,5 +7,5 @@ import org.apache.http.protocol.HttpContext;
 
 public interface ParamHandler {
 
-    public Object createParam(HttpRequest request, HttpResponse response, HttpContext context);
+    public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker);
 }

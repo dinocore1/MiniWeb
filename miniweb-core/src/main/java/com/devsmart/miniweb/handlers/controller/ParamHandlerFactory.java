@@ -13,6 +13,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import com.devsmart.miniweb.handlers.ReflectionControllerRequestHandler;
 import com.devsmart.miniweb.utils.UriQueryParser;
+import com.google.gson.stream.JsonWriter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,24 +36,32 @@ public class ParamHandlerFactory {
         if(HttpRequest.class.equals(paramType)){
             return new ParamHandler() {
                 @Override
-                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
                     return request;
                 }
             };
         } else if(HttpResponse.class.equals(paramType)){
             return new ParamHandler() {
                 @Override
-                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
                     return response;
                 }
             };
         } else if(HttpContext.class.equals(paramType)){
             return new ParamHandler() {
                 @Override
-                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
                     return context;
                 }
             };
+        } else if(JsonWriter.class.equals(paramType)){
+            return new ParamHandler() {
+                @Override
+                public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
+                    return controllerInvoker.createJsonWriter(response);
+                }
+            };
+
         } else if(annotations != null){
             if(annotations != null) {
                 final RequestParam paramKey = getAnnotationType(annotations, RequestParam.class);
@@ -77,7 +87,7 @@ public class ParamHandlerFactory {
     private ParamHandler pathVar(Class<?> paramType, final PathVariable pathVar) {
         return new ParamHandler() {
             @Override
-            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
                 Map<String, String> pathParams = (Map<String, String>) request.getParams().getParameter(ReflectionControllerRequestHandler.PATH_VARS);
                 return pathParams.get(pathVar.value());
             }
@@ -106,7 +116,7 @@ public class ParamHandlerFactory {
             }
 
             @Override
-            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
                 try {
                     if(request instanceof HttpEntityEnclosingRequest){
                         HttpEntityEnclosingRequest entityRequest = (HttpEntityEnclosingRequest) request;
@@ -128,7 +138,7 @@ public class ParamHandlerFactory {
     private ParamHandler queryParam(final Class<?> paramType, final RequestParam paramKey) {
         return new ParamHandler() {
             @Override
-            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context) {
+            public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
 
                 String uri = request.getRequestLine().getUri();
                 Map<String, List<String>> params = UriQueryParser.getUrlParameters(uri);
