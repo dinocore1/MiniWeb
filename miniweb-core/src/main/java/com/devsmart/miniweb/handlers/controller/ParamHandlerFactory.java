@@ -163,6 +163,10 @@ public class ParamHandlerFactory {
                         return Double.parseDouble(values.get(0));
                     } else if (paramType.isAssignableFrom(int.class) && !values.isEmpty()) {
                         return Integer.parseInt(values.get(0));
+                    } else if (paramType.isAssignableFrom(long.class) && !values.isEmpty()) {
+                        return Long.parseLong(values.get(0));
+                    } else if (paramType.isAssignableFrom(boolean.class) && !values.isEmpty()) {
+                        return Boolean.parseBoolean(values.get(0));
                     }
                 }
 
