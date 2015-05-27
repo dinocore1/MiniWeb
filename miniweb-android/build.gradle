@@ -23,6 +23,10 @@ android {
         versionName "1.0"
     }
 
+    sourceSets {
+        main.java.srcDirs = ['src/main/java', '../miniweb-core/src/main/java']
+    }
+
 
     buildTypes {
         release {
@@ -36,7 +40,6 @@ android {
 }
 
 dependencies {
-    compile project(':miniweb-core')
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'org.slf4j:slf4j-api:1.7.8'
 

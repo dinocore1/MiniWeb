@@ -11,7 +11,7 @@ targetCompatibility = JavaVersion.VERSION_1_6
 
 
 dependencies {
-    compile 'org.apache.httpcomponents:httpcore:4.0-beta2'
+    compile 'org.apache.httpcomponents:httpcore:4.0.1'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'org.slf4j:slf4j-api:1.7.8'
     testCompile 'junit:junit:4.11'
