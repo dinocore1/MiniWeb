@@ -1,16 +1,13 @@
 allprojects {
 
     group = 'com.dev-smart'
-    version = '0.1.5'
+    version = '0.1.6-SNAPSHOT'
     description = 'A embedded java webserver'
 
     repositories {
-        mavenCentral()
+        jcenter()
         maven {
-            url "http://maven.sciaps.local"
-        }
-        maven {
-            url "http://files.couchbase.com/maven2/"
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
     }
 }

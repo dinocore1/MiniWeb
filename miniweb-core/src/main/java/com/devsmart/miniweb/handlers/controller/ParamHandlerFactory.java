@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -140,11 +141,11 @@ public class ParamHandlerFactory {
             @Override
             public Object createParam(HttpRequest request, HttpResponse response, HttpContext context, ControllerInvoker controllerInvoker) {
 
-                String uri = request.getRequestLine().getUri();
+                final String uri = request.getRequestLine().getUri();
                 Map<String, List<String>> params = UriQueryParser.getUrlParameters(uri);
 
                 List<String> values = params.get(paramKey.value());
-                if(values != null) {
+                if (values != null) {
                     if (paramType.isArray()) {
                         String[] retval = new String[values.size()];
                         int i = 0;
@@ -157,9 +158,9 @@ public class ParamHandlerFactory {
                     } else if (paramType.isAssignableFrom(Set.class)) {
                         HashSet<String> retval = new HashSet<String>(values);
                         return retval;
-                    } else if (paramType.isAssignableFrom(String.class) && !values.isEmpty()){
+                    } else if (paramType.isAssignableFrom(String.class) && !values.isEmpty()) {
                         return values.get(0);
-                    } else if(paramType.isAssignableFrom(double.class) && !values.isEmpty()) {
+                    } else if (paramType.isAssignableFrom(double.class) && !values.isEmpty()) {
                         return Double.parseDouble(values.get(0));
                     } else if (paramType.isAssignableFrom(int.class) && !values.isEmpty()) {
                         return Integer.parseInt(values.get(0));

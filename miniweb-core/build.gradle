@@ -1,17 +1,17 @@
 
-
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
-
+compileJava {
+    targetCompatibility = 1.6
+    sourceCompatibility = 1.6
+}
 
 dependencies {
     compile 'org.apache.httpcomponents:httpcore:4.0.1'
+    //compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'org.slf4j:slf4j-api:1.7.8'
     testCompile 'junit:junit:4.11'
@@ -48,6 +48,10 @@ uploadArchives {
             authentication(userName: sonatypeUsername, password: sonatypePassword)
         }
 
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
+        }
+
         pom.project {
             name 'Miniweb-core'
             description 'Miniweb is an embedded webserver for Java.'
@@ -74,12 +78,6 @@ uploadArchives {
                 }
             }
         }
-
-        //repository(url: "file:///home/paul/mymaven")
-        //repository(url: "file://localhost/var/www/maven/")
-        //pom.groupId = project.group
-        //pom.artifactId = 'miniweb'
-        //pom.version = project.version
 
     }
 }
