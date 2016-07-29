@@ -37,7 +37,7 @@ public class Server {
 
         final ServerSocket mServerSocket = new ServerSocket(port);
         logger.info("Server started listening on {}", mServerSocket.getLocalSocketAddress());
-        mServerSocket.setSoTimeout(1000);
+        //mServerSocket.setSoTimeout(1000);
         mRunning = true;
 
         mListenThread = new Thread(new Runnable() {
@@ -133,28 +133,14 @@ public class Server {
             } catch (ConnectionClosedException e) {
                 logger.debug("client closed connection {}", remoteConnection.connection);
 
-            } catch(SocketTimeoutException e){
-                logger.debug("timing out connection {}", remoteConnection.connection);
-                try {
-
-
-                    DefaultHttpResponseFactory responseFactory = new DefaultHttpResponseFactory();
-                    HttpResponse response = responseFactory.newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_0, HttpStatus.SC_SERVICE_UNAVAILABLE, ""), mContext);
-
-
-                    remoteConnection.connection.sendResponseHeader(response);
-                    remoteConnection.connection.sendResponseEntity(response);
-                    remoteConnection.connection.flush();
-                } catch (Exception ex){
-                    logger.error("", e);
-                }
-
             } catch (IOException e) {
                 logger.warn("IO error: " + e.getMessage());
 
             } catch (HttpException e) {
                 logger.warn("Unrecoverable HTTP protocol violation: " + e.getMessage());
 
+            } catch (Exception e){
+                logger.warn("unknown error: {}", e);
             } finally {
                 shutdown();
             }
