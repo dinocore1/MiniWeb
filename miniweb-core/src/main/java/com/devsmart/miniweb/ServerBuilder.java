@@ -8,25 +8,18 @@ import com.google.gson.GsonBuilder;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerResolver;
 import com.devsmart.miniweb.handlers.FileSystemRequestHandler;
-import com.devsmart.miniweb.impl.DefaultConnectionPolicy;
 
 import java.io.File;
 
 public class ServerBuilder {
 
     private int mPort = 8080;
-    private ConnectionPolicy mConnectionPolicy = new DefaultConnectionPolicy(30);
     private HttpRequestHandlerResolver mRequestHandler;
     private UriRequestHandlerResolver mUriMapper = new UriRequestHandlerResolver();
     private Gson mGson = new GsonBuilder().create();
 
     public ServerBuilder port(int port) {
         mPort = port;
-        return this;
-    }
-
-    public ServerBuilder connectionPolicy(ConnectionPolicy policy){
-        mConnectionPolicy = policy;
         return this;
     }
 
@@ -76,7 +69,6 @@ public class ServerBuilder {
     public Server create() {
         Server server = new Server();
         server.port = mPort;
-        server.connectionPolity = mConnectionPolicy;
         if(mRequestHandler == null){
             mRequestHandler = mUriMapper;
         }

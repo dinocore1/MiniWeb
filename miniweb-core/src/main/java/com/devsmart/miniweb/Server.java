@@ -17,83 +17,30 @@ import java.util.concurrent.*;
 
 public class Server {
 
-    public final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
-    protected int port;
-    protected HttpRequestHandlerResolver requestHandlerResolver;
-    protected ConnectionPolicy connectionPolity;
+    int port;
+    HttpRequestHandlerResolver requestHandlerResolver;
 
     private final ExecutorService mWorkerThreads = Executors.newCachedThreadPool();
 
-    private Thread mListenThread;
+    private ServerSocket mServerSocket;
+    private SocketListener mListenThread;
     private boolean mRunning = false;
-    private BasicHttpContext mContext;
+    private BasicHttpContext mContext = new BasicHttpContext();
 
     public void start() throws IOException {
-
         if(mRunning){
-            throw new IOException("server already running");
+            LOGGER.warn("server already running");
+            return;
         }
 
-        final ServerSocket mServerSocket = new ServerSocket(port);
-        logger.info("Server started listening on {}", mServerSocket.getLocalSocketAddress());
-        //mServerSocket.setSoTimeout(1000);
+        mServerSocket = new ServerSocket(port);
+        LOGGER.info("Server started listening on {}", mServerSocket.getLocalSocketAddress());
+
         mRunning = true;
 
-        mListenThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // Set up the HTTP protocol processor
-
-                mContext = new BasicHttpContext();
-                BasicHttpProcessor httpproc = new BasicHttpProcessor();
-                httpproc.addResponseInterceptor(new ResponseDate());
-                httpproc.addResponseInterceptor(new ResponseServer());
-                httpproc.addResponseInterceptor(new ResponseContent());
-                httpproc.addResponseInterceptor(new ResponseConnControl());
-
-                DefaultHttpResponseFactory responseFactory = new DefaultHttpResponseFactory();
-                HttpParams params = new BasicHttpParams();
-                HttpService httpService = new HttpService(httpproc, new DefaultConnectionReuseStrategy(), responseFactory);
-                httpService.setHandlerResolver(requestHandlerResolver);
-                httpService.setParams(params);
-
-                while(mRunning){
-                    try {
-                        Socket socket = mServerSocket.accept();
-
-
-                        if(connectionPolity.accept(socket)){
-                            logger.debug("accepting connection from: {}", socket.getRemoteSocketAddress());
-
-                            DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
-                            connection.bind(socket, new BasicHttpParams());
-                            RemoteConnection remoteConnection = new RemoteConnection(socket.getInetAddress(), connection);
-                            connectionPolity.connectionOpened(remoteConnection);
-                            mWorkerThreads.execute(new WorkerTask(httpService, remoteConnection));
-                        } else {
-                            logger.debug("rejecting connection from: {}", socket);
-
-                            try {
-                                DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
-                                connection.bind(socket, new BasicHttpParams());
-                                HttpResponse response = responseFactory.newHttpResponse(new BasicStatusLine(HttpVersion.HTTP_1_0, HttpStatus.SC_SERVICE_UNAVAILABLE, ""), mContext);
-                                connection.sendResponseHeader(response);
-                                connection.sendResponseEntity(response);
-                                connection.flush();
-                                connection.close();
-                            } catch (Exception e) {}
-                        }
-
-                    } catch(SocketTimeoutException e) {
-                    } catch (IOException e){
-                        logger.error("", e);
-                        mRunning = false;
-                    }
-                }
-
-            }
-        });
+        mListenThread = new SocketListener();
         mListenThread.setName("MiniWeb Listen " + mServerSocket.getLocalSocketAddress());
         mListenThread.start();
 
@@ -106,9 +53,9 @@ public class Server {
                 mListenThread.join();
                 mListenThread = null;
             } catch (InterruptedException e) {
-                logger.error("", e);
+                LOGGER.error("", e);
             }
-            logger.info("Server shutdown");
+            LOGGER.info("Server shutdown");
         }
     }
 
@@ -131,16 +78,16 @@ public class Server {
                     httpservice.handleRequest(remoteConnection.connection, mContext);
                 }
             } catch (ConnectionClosedException e) {
-                logger.debug("client closed connection {}", remoteConnection.connection);
+                LOGGER.debug("client closed connection {}", remoteConnection.connection);
 
             } catch (IOException e) {
-                logger.warn("IO error: " + e.getMessage());
+                LOGGER.warn("IO error: " + e.getMessage());
 
             } catch (HttpException e) {
-                logger.warn("Unrecoverable HTTP protocol violation: " + e.getMessage());
+                LOGGER.warn("Unrecoverable HTTP protocol violation: " + e.getMessage());
 
             } catch (Exception e){
-                logger.warn("unknown error: {}", e);
+                LOGGER.warn("unknown error: {}", e);
             } finally {
                 shutdown();
             }
@@ -152,12 +99,47 @@ public class Server {
             try {
                 remoteConnection.connection.shutdown();
             } catch (IOException e){
-
-            }
-            finally {
-                connectionPolity.connectionClosed(remoteConnection);
+                LOGGER.error("", e);
             }
 
+        }
+    }
+
+    private class SocketListener extends Thread {
+
+        @Override
+        public void run() {
+            // Set up the HTTP protocol processor
+            BasicHttpProcessor httpProcessor = new BasicHttpProcessor();
+            httpProcessor.addResponseInterceptor(new ResponseDate());
+            httpProcessor.addResponseInterceptor(new ResponseServer());
+            httpProcessor.addResponseInterceptor(new ResponseContent());
+            httpProcessor.addResponseInterceptor(new ResponseConnControl());
+
+            DefaultHttpResponseFactory responseFactory = new DefaultHttpResponseFactory();
+            HttpParams params = new BasicHttpParams();
+            HttpService httpService = new HttpService(httpProcessor, new DefaultConnectionReuseStrategy(), responseFactory);
+            httpService.setHandlerResolver(requestHandlerResolver);
+            httpService.setParams(params);
+
+            while(mRunning){
+                try {
+                    Socket socket = mServerSocket.accept();
+
+                    LOGGER.info("accepting connection from: {}", socket.getRemoteSocketAddress());
+
+                    DefaultHttpServerConnection connection = new DefaultHttpServerConnection();
+                    connection.bind(socket, new BasicHttpParams());
+                    RemoteConnection remoteConnection = new RemoteConnection(socket.getInetAddress(), connection);
+
+                    mWorkerThreads.execute(new WorkerTask(httpService, remoteConnection));
+
+                } catch(SocketTimeoutException e) {
+                } catch (IOException e){
+                    LOGGER.error("", e);
+                    mRunning = false;
+                }
+            }
         }
     }
 
